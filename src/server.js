@@ -48,7 +48,7 @@ var userJoined = function (socket){
 				rectX: socket.posX,
 				rectY: socket.posY
 			});
-		};
+		}
 	});
 };
 
@@ -74,7 +74,7 @@ var userClicked = function(socket){
 				rectX: socket.posX,
 				rectY: socket.posY
 			});
-		};
+		}
 		
 	});
 };
