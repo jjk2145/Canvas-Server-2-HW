@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   	
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+	var socket;
+	var canvas;
+	var ctx;
+	var user;
+	var rectCoordX;
+	var	rectCoordY;
+	var name;
+	var mouseX;
+	var mouseY;
+	var draws = {};
+	
+	
+	
+/////////////////////////////////////init////////////////////////////////////////////////////
+	function init()													
+	{
+		var connect = document.querySelector("#connect");
+			connect.addEventListener('click', connectSocket);
+	}
+	
+	function connectSocket(e)
+	{
+		socket = io.connect();
+		
+		user = document.querySelector("#username").value;
+			
+		if(!user){
+			user = 'unknown';
+		}
+		
+		socket.emit('join', {name: user, msg: 'has connected'});
+		document.getElementById("connect").style.visibility = "hidden";
+		
+		canvas = document.querySelector('#CanvasArea');
+		ctx = canvas.getContext('2d');
+		setUp();
+		handleMessage();
+		canvas.onmouseup = mouseUp;
+		ctx.rect(0,0,canvas.width,canvas.height);
+		ctx.strokeStyle = "green";
+		ctx.lineWidth = 3;
+		ctx.stroke();
+	}
+	
+	function setUp()
+	{
+		var time = new Date().getTime();
+		var points = 0;
+		draws[user] = {
+			lastUpdate: time,
+			score: points
+			};
+	}
+	
+///////////////////////////////////makes the rectangle///////////////////////////////////////
+	function draw(rectCoordX, rectCoordY)		
+	{
+		ctx.clearRect(20, 20, 760, 460);
+		ctx.fillRect(rectCoordX, rectCoordY, 15, 15);
+	}
+		
+		
+	function scoreKeeper()
+	{
+		
+		var html = "";
+		html += '<ol>';
+		var keys = Object.keys(draws);
+		console.log(keys);
+		for(var i = 0; i < keys.length; i++)
+		{
+			var drawCall = draws[ keys[i] ];
+			console.log(drawCall);
+			var points = 5;
+			html += '<li>User: '+ user + ' has a score of: ' + points + '</li>';
+		}
+		html += '</ol>';			
+		//document.getElementById('#scoreChart').innerHTML = html;
+	}	
+	
+////////////////////////////////////data from server//////////////////////////////////////////
+	function handleMessage(data)			
+	{
+		socket.on('msg', function(data){
+			window.alert(data.msg);
+		});
+		
+		socket.on('updateTheCanvas', function(data){
+			if( !draws[data.name] )
+			{
+				draws[data.name] = data.info;
+			}
+			else if( data.info.lastUpdate > draws[data.name].lastUpdate )
+			{
+				draws[data.name] = data.info;
+			}
+			rectCoordX = data.rectX;
+			rectCoordY = data.rectY;
+			draw(rectCoordX, rectCoordY); 
+			scoreKeeper();
+		});
+	}
+
+/////////////////////////////////gets mouse coords for the server/////////////////////////////
+	function mouseUp(e)
+	{
+		var mouse = getMouse(e);
+		mouseX = mouse.x;
+		mouseY = mouse.y;
+	console.log ("clicked at x: " + mouse.x + ", y: " + mouse.y);
+		
+		var time = new Date().getTime();
+		var points = 0;
+		draws[user].lastUpdate = time;
+		draws[user].score = points;
+		socket.emit('clicked', { name: user, info: draws[user], x: mouseX, y: mouseY});
+	}
+
+/////////////////////////////////////Gets appropriate mouse coords///////////////////////////////
+	function getMouse(e){
+		var mouse = {}
+		mouse.x = e.pageX - e.target.offsetLeft;
+		mouse.y = e.pageY - e.target.offsetTop;
+		return mouse;
+	}
+	window.onload = init;	  
+	</script>
+	<style>
+	
+	#score{
+		float:right;
+	}
+	
+	</style>
+	
+</head>
+<body>
+<h3> Square Clicking Game For 2 Or More</h3>
+<br />
+<label for="user">Username:</label>
+<input id="username" name="user" type="text"/>
+<input id="connect" type='button' value='connect'/>
+<br />
+<canvas id="CanvasArea" width="800" height="500"></canvas>
+<div id="scoreChart">Score Chart</div>
+</body>
+</html>

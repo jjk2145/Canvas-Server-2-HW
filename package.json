@@ -1,0 +1,23 @@
+{
+  "name": "servercanvashw",
+  "version": "1.0.0",
+  "description": "server canvas hw",
+  "main": "index.js",
+  "scripts": {
+    "test": "start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jjk2145/Canvas-Server-2-HW.git"
+  },
+  "author": "joe kramer",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jjk2145/Canvas-Server-2-HW/issues"
+  },
+  "homepage": "https://github.com/jjk2145/Canvas-Server-2-HW#readme",
+  "dependencies": {
+    "jshint": "^2.9.1",
+    "socket.io": "^1.4.5"
+  }
+}
